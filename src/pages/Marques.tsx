@@ -1,9 +1,10 @@
 // src/pages/Marques.tsx
 import { useState, useEffect } from 'react';
-import { Heart, Star, ShoppingCart, Search, Filter, ZoomIn, Plus, X, ArrowRight } from 'lucide-react';
+import { Star, ShoppingCart, Search, Filter, ZoomIn, Plus, X, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import HeartButton from '../components/HeartButton';
 
-interface Brand {
+interface Product {
   id: number;
   name: string;
   brand: string;
@@ -13,18 +14,19 @@ interface Brand {
   salePrice: number;
   image: string;
   rating: number;
-  isFavorite: boolean;
   category: string;
+  isNew: boolean;
+  releaseDate: string;
 }
 
 const Marques = () => {
   const { addToCart, cartItems } = useCart();
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showZoom, setShowZoom] = useState(false);
 
-  const [brands, setBrands] = useState<Brand[]>([
+  const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
       name: "Cosmetic Skin Perfectly",
@@ -35,8 +37,9 @@ const Marques = () => {
       salePrice: 64.99,
       image: "/images/pexels-hype-international-395825114-14798327.jpg",
       rating: 4.8,
-      isFavorite: false,
-      category: "Soin Visage"
+      category: "Soin Visage",
+      isNew: true,
+      releaseDate: "2024-01-25"
     },
     {
       id: 2,
@@ -48,8 +51,9 @@ const Marques = () => {
       salePrice: 49.99,
       image: "/images/pexels-itslauravillela-29022722.jpg",
       rating: 4.6,
-      isFavorite: false,
-      category: "Soin Visage"
+      category: "Soin Visage",
+      isNew: false,
+      releaseDate: "2024-01-20"
     },
     {
       id: 3,
@@ -61,8 +65,9 @@ const Marques = () => {
       salePrice: 89.99,
       image: "/images/pexels-anastasiia-melnykova-158522451-10756338.jpg",
       rating: 4.9,
-      isFavorite: false,
-      category: "Maquillage"
+      category: "Maquillage",
+      isNew: true,
+      releaseDate: "2024-01-30"
     },
     {
       id: 4,
@@ -74,8 +79,9 @@ const Marques = () => {
       salePrice: 45.99,
       image: "/images/pexels-janakukebal-6689393.jpg",
       rating: 4.7,
-      isFavorite: false,
-      category: "Maquillage"
+      category: "Maquillage",
+      isNew: false,
+      releaseDate: "2024-01-15"
     },
     {
       id: 5,
@@ -87,8 +93,9 @@ const Marques = () => {
       salePrice: 69.99,
       image: "/images/pexels-monirathnak-14836428.jpg",
       rating: 4.8,
-      isFavorite: false,
-      category: "Soin Visage"
+      category: "Soin Visage",
+      isNew: true,
+      releaseDate: "2024-02-01"
     },
     {
       id: 6,
@@ -100,8 +107,9 @@ const Marques = () => {
       salePrice: 79.99,
       image: "/images/pexels-monirathnak-24602077.jpg",
       rating: 4.9,
-      isFavorite: false,
-      category: "Soin Visage"
+      category: "Soin Visage",
+      isNew: false,
+      releaseDate: "2024-01-18"
     },
     {
       id: 7,
@@ -113,8 +121,9 @@ const Marques = () => {
       salePrice: 59.99,
       image: "/images/pexels-laurencuddy-20523085.jpg",
       rating: 4.5,
-      isFavorite: false,
-      category: "Soin Corps"
+      category: "Soin Corps",
+      isNew: true,
+      releaseDate: "2024-01-22"
     },
     {
       id: 8,
@@ -126,35 +135,39 @@ const Marques = () => {
       salePrice: 54.99,
       image: "/images/pexels-mearlywan-307951439-16378445.jpg",
       rating: 4.7,
-      isFavorite: false,
-      category: "Soin Visage"
+      category: "Soin Visage",
+      isNew: false,
+      releaseDate: "2024-01-28"
     }
   ]);
 
-  const toggleFavorite = (brandId: number) => {
-    setBrands(brands.map(brand => 
-      brand.id === brandId 
-        ? { ...brand, isFavorite: !brand.isFavorite }
-        : brand
-    ));
-  };
+  const handleAddToCart = (productId: number) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
 
-  const handleAddToCart = (brand: Brand) => {
     addToCart({
-      name: brand.name,
-      price: brand.salePrice.toFixed(2),
-      image: brand.image
+      name: product.name,
+      price: product.salePrice.toFixed(2),
+      image: product.image
     });
+    
+    const button = document.getElementById(`add-btn-${productId}`);
+    if (button) {
+      button.classList.add('animate-bounce');
+      setTimeout(() => button.classList.remove('animate-bounce'), 600);
+    }
+
+    console.log('Produit ajouté au panier!', product.name);
   };
 
-  const handleZoom = (brand: Brand) => {
-    setSelectedBrand(brand);
+  const handleZoom = (product: Product) => {
+    setSelectedProduct(product);
     setShowZoom(true);
   };
 
   const closeZoom = () => {
     setShowZoom(false);
-    setTimeout(() => setSelectedBrand(null), 300);
+    setTimeout(() => setSelectedProduct(null), 300);
   };
 
   const renderStars = (rating: number) => {
@@ -175,17 +188,17 @@ const Marques = () => {
     );
   };
 
-  const filteredBrands = brands.filter(brand => {
-    const matchesSearch = brand.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         brand.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === 'all' || brand.category === filter;
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filter === 'all' || product.category === filter;
     return matchesSearch && matchesFilter;
   });
 
-  const categories = ['all', 'Soin Visage', 'Maquillage', 'Soin Corps', 'Vegan', 'Naturel'];
+  const categories = ['all', 'Soin Visage', 'Maquillage', 'Soin Corps'];
 
-  const isInCart = (brandName: string) => {
-    return cartItems.some(item => item.name === brandName);
+  const isInCart = (productName: string) => {
+    return cartItems.some(item => item.name === productName);
   };
 
   return (
@@ -270,22 +283,22 @@ const Marques = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filteredBrands.map((brand) => (
+          {filteredProducts.map((product) => (
             <div 
-              key={brand.id}
+              key={product.id}
               className="bg-white rounded-lg shadow-md overflow-hidden group hover:shadow-lg transition-all duration-300 border border-amber-200"
             >
               <div className="relative overflow-hidden">
                 <img 
-                  src={brand.image} 
-                  alt={brand.name}
+                  src={product.image} 
+                  alt={product.name}
                   className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 
                 {/* Badge Réduction */}
                 <div className="absolute top-2 left-2">
                   <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-md">
-                    -{brand.discount} €
+                    -{product.discount} €
                   </span>
                 </div>
 
@@ -293,54 +306,50 @@ const Marques = () => {
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
                   <div className="transform translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-1">
                     <button 
-                      onClick={() => handleZoom(brand)}
+                      onClick={() => handleZoom(product)}
                       className="bg-white p-1 rounded-full shadow-md hover:bg-amber-50 transition-all duration-200 transform hover:scale-110"
                     >
                       <ZoomIn className="w-3 h-3 text-amber-700" />
                     </button>
                     
-                    <button 
-                      onClick={() => toggleFavorite(brand.id)}
-                      className={`p-1 rounded-full shadow-md transition-all duration-200 transform hover:scale-110 ${
-                        brand.isFavorite 
-                          ? 'bg-amber-600 text-white' 
-                          : 'bg-white text-amber-700 hover:bg-amber-50'
-                      }`}
-                    >
-                      <Heart className="w-3 h-3" fill={brand.isFavorite ? "currentColor" : "none"} />
-                    </button>
+                    <HeartButton 
+                      product={product}
+                      size="sm"
+                      className="bg-white p-1 rounded-full shadow-md hover:bg-amber-50"
+                    />
                   </div>
                 </div>
 
                 {/* Bouton Ajouter au Panier */}
                 <button 
-                  onClick={() => handleAddToCart(brand)}
+                  id={`add-btn-${product.id}`}
+                  onClick={() => handleAddToCart(product.id)}
                   className={`absolute bottom-2 right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-md transition-all duration-300 transform hover:scale-110 ${
-                    isInCart(brand.name)
+                    isInCart(product.name)
                       ? 'bg-green-500 text-white'
                       : 'bg-amber-600 text-white hover:bg-amber-700'
                   }`}
                 >
-                  {isInCart(brand.name) ? '✓' : <ShoppingCart className="w-3 h-3" />}
+                  {isInCart(product.name) ? '✓' : <ShoppingCart className="w-3 h-3" />}
                 </button>
               </div>
 
               <div className="p-3">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-medium text-amber-800 bg-amber-100 px-2 py-1 rounded">
-                    {brand.category}
+                    {product.category}
                   </span>
-                  {renderStars(brand.rating)}
+                  {renderStars(product.rating)}
                 </div>
 
-                <h3 className="font-bold text-amber-900 text-sm mb-1 line-clamp-1">{brand.name}</h3>
-                <p className="text-xs text-amber-700 mb-1 line-clamp-1">{brand.brand}</p>
-                <p className="text-amber-600 text-xs mb-2 line-clamp-2">{brand.description}</p>
+                <h3 className="font-bold text-amber-900 text-sm mb-1 line-clamp-1">{product.name}</h3>
+                <p className="text-xs text-amber-700 mb-1 line-clamp-1">{product.brand}</p>
+                <p className="text-amber-600 text-xs mb-2 line-clamp-2">{product.description}</p>
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
-                    <span className="text-base font-bold text-amber-800">{brand.salePrice.toFixed(2)} €</span>
-                    <span className="text-xs text-amber-600 line-through">{brand.originalPrice.toFixed(2)} €</span>
+                    <span className="text-base font-bold text-amber-800">{product.salePrice.toFixed(2)} €</span>
+                    <span className="text-xs text-amber-600 line-through">{product.originalPrice.toFixed(2)} €</span>
                   </div>
                 </div>
               </div>
@@ -348,7 +357,7 @@ const Marques = () => {
           ))}
         </div>
 
-        {filteredBrands.length === 0 && (
+        {filteredProducts.length === 0 && (
           <div className="text-center py-8">
             <p className="text-amber-500 text-sm">Aucune marque trouvée correspondant à vos critères.</p>
           </div>
@@ -356,7 +365,7 @@ const Marques = () => {
       </div>
 
       {/* Modal Zoom */}
-      {showZoom && selectedBrand && (
+      {showZoom && selectedProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div 
             className="absolute inset-0 bg-amber-900 bg-opacity-50 backdrop-blur-sm"
@@ -374,13 +383,13 @@ const Marques = () => {
             <div className="grid md:grid-cols-2 gap-0">
               <div className="relative">
                 <img 
-                  src={selectedBrand.image} 
-                  alt={selectedBrand.name}
+                  src={selectedProduct.image} 
+                  alt={selectedProduct.name}
                   className="w-full h-64 object-cover"
                 />
                 <div className="absolute top-2 left-2">
                   <span className="bg-amber-600 text-white px-2 py-1 rounded text-xs font-bold">
-                    -{selectedBrand.discount} €
+                    -{selectedProduct.discount} €
                   </span>
                 </div>
               </div>
@@ -388,20 +397,20 @@ const Marques = () => {
               <div className="p-4 flex flex-col justify-center">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-medium text-amber-800 bg-amber-100 px-2 py-1 rounded">
-                    {selectedBrand.category}
+                    {selectedProduct.category}
                   </span>
-                  {renderStars(selectedBrand.rating)}
+                  {renderStars(selectedProduct.rating)}
                 </div>
 
-                <h2 className="text-lg font-bold text-amber-900 mb-1">{selectedBrand.name}</h2>
-                <p className="text-sm text-amber-700 mb-3">{selectedBrand.brand}</p>
+                <h2 className="text-lg font-bold text-amber-900 mb-1">{selectedProduct.name}</h2>
+                <p className="text-sm text-amber-700 mb-3">{selectedProduct.brand}</p>
                 
-                <p className="text-amber-600 text-sm mb-4 leading-relaxed">{selectedBrand.description}</p>
+                <p className="text-amber-600 text-sm mb-4 leading-relaxed">{selectedProduct.description}</p>
                 
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center justify-between py-1 border-b border-amber-200">
                     <span className="text-amber-600 text-xs">Type</span>
-                    <span className="font-medium text-amber-900 text-xs">{selectedBrand.category}</span>
+                    <span className="font-medium text-amber-900 text-xs">{selectedProduct.category}</span>
                   </div>
                   <div className="flex items-center justify-between py-1 border-b border-amber-200">
                     <span className="text-amber-600 text-xs">Texture</span>
@@ -419,25 +428,20 @@ const Marques = () => {
                 
                 <div className="flex items-center justify-between pt-3 border-t border-amber-200">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-amber-800">{selectedBrand.salePrice.toFixed(2)} €</span>
-                    <span className="text-sm text-amber-600 line-through">{selectedBrand.originalPrice.toFixed(2)} €</span>
+                    <span className="text-lg font-bold text-amber-800">{selectedProduct.salePrice.toFixed(2)} €</span>
+                    <span className="text-sm text-amber-600 line-through">{selectedProduct.originalPrice.toFixed(2)} €</span>
                   </div>
                   
                   <div className="flex gap-2">
-                    <button 
-                      onClick={() => toggleFavorite(selectedBrand.id)}
-                      className={`p-2 rounded border transition-all duration-200 transform hover:scale-110 ${
-                        selectedBrand.isFavorite 
-                          ? 'bg-amber-600 text-white border-amber-600' 
-                          : 'bg-white text-amber-700 border-amber-300 hover:border-amber-600'
-                      }`}
-                    >
-                      <Heart className="w-4 h-4" fill={selectedBrand.isFavorite ? "currentColor" : "none"} />
-                    </button>
+                    <HeartButton 
+                      product={selectedProduct}
+                      size="sm"
+                      className="bg-white p-2 rounded border border-amber-300 hover:border-amber-600"
+                    />
                     
                     <button 
                       onClick={() => {
-                        handleAddToCart(selectedBrand);
+                        handleAddToCart(selectedProduct.id);
                         closeZoom();
                       }}
                       className="bg-amber-600 text-white px-3 py-2 text-sm font-medium hover:bg-amber-700 transition-all duration-300 flex items-center gap-1 rounded transform hover:scale-105"

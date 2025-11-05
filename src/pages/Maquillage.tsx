@@ -1,7 +1,9 @@
 // src/pages/Maquillage.tsx
 import { useState } from 'react';
-import { Heart, ZoomIn, Plus, X, Star } from 'lucide-react';
+import { ZoomIn, Plus, X, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useNavigate } from 'react-router-dom';
+import HeartButton from '../components/HeartButton';
 
 interface Product {
   id: number;
@@ -13,83 +15,99 @@ interface Product {
   image: string;
   category: string;
   rating: number;
-  isFavorite: boolean;
+  isNew: boolean;
+  releaseDate: string;
+  discount: string;
 }
 
 const Maquillage = () => {
   const { addToCart, cartItems } = useCart();
+  const navigate = useNavigate();
+  
   const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
-      name: "Matte Lipstick",
-      brand: "Glamour Cosmetics",
+      name: "Rouge à Lèvres Mat",
+      brand: "Maram Beauty",
       description: "Rouge à lèvres mat longue tenue avec formule hydratante. Couleur intense qui dure toute la journée sans sécher les lèvres.",
       originalPrice: 32.00,
       salePrice: 16.00,
       image: "/images/pexels-walaa-dag-218036224-11883768.jpg",
-      category: "Makeup",
+      category: "Maquillage",
       rating: 4.8,
-      isFavorite: false
+      isNew: true,
+      releaseDate: "2024-01-25",
+      discount: "50"
     },
     {
       id: 2,
-      name: "Liquid Foundation",
-      brand: "Beauty Flash",
+      name: "Fond de Teint Liquide",
+      brand: "Maram Beauty",
       description: "Fond de teint liquide couvrant avec fini naturel. Texture légère qui unifie le teint et cache les imperfections.",
       originalPrice: 45.00,
       salePrice: 22.50,
       image: "/images/pexels-karola-g-4938201.jpg",
-      category: "Makeup",
+      category: "Maquillage",
       rating: 4.7,
-      isFavorite: false
+      isNew: false,
+      releaseDate: "2024-01-20",
+      discount: "50"
     },
     {
       id: 3,
-      name: "Eye Shadow Palette",
-      brand: "Color Fusion",
+      name: "Palette Fards à Paupières",
+      brand: "Maram Beauty",
       description: "Palette de fards à paupières avec 12 nuances mat et scintillantes. Pigmentation intense et texture facile à blend.",
       originalPrice: 58.00,
       salePrice: 29.00,
       image: "/images/pexels-aditi-ahalawat-2062245-6233289.jpg",
-      category: "Makeup",
+      category: "Maquillage",
       rating: 4.9,
-      isFavorite: false
+      isNew: true,
+      releaseDate: "2024-01-30",
+      discount: "50"
     },
     {
       id: 4,
       name: "Mascara Volume",
-      brand: "Lash Queen",
+      brand: "Maram Beauty",
       description: "Mascara volume intense qui allonge et courbe les cils sans les empâter. Résultat naturel et waterproof.",
       originalPrice: 28.00,
       salePrice: 14.00,
-      image: "/images/pexels-828860-2688992.jpg", // SEULEMENT CETTE IMAGE A ÉTÉ MODIFIÉE
-      category: "Makeup",
+      image: "/images/pexels-828860-2688992.jpg",
+      category: "Maquillage",
       rating: 4.6,
-      isFavorite: false
+      isNew: false,
+      releaseDate: "2024-01-15",
+      discount: "50"
     },
     {
       id: 5,
-      name: "Blush Palette",
-      brand: "Rose Velvet",
+      name: "Palette Blush",
+      brand: "Maram Beauty",
       description: "Palette blush avec 4 nuances rosées pour un teint frais et naturel. Texture powder-cream pour un fini satiné.",
       originalPrice: 35.00,
       salePrice: 17.50,
       image: "/images/pexels-amazingsobia-5420688.jpg",
-      category: "Makeup",
+      category: "Maquillage",
       rating: 4.8,
-      isFavorite: false
+      isNew: true,
+      releaseDate: "2024-02-01",
+      discount: "50"
     },
     {
       id: 6,
-      name: "Highlighter Glow",
-      brand: "Lumiere Divine",
+      name: "Highlighter Lumière",
+      brand: "Maram Beauty",
       description: "Highlighter nacré pour un éclat naturel. Texture légère qui illumine les points stratégiques du visage.",
       originalPrice: 26.00,
       salePrice: 13.00,
       image: "/images/pexels-alena-chuyankova-280716561-18978369.jpg",
-      category: "Makeup",
+      category: "Maquillage",
       rating: 4.7,
-      isFavorite: false
+      isNew: false,
+      releaseDate: "2024-01-18",
+      discount: "50"
     }
   ]);
 
@@ -98,14 +116,6 @@ const Maquillage = () => {
 
   const isInCart = (productId: number) => {
     return cartItems.some(item => item.name === products.find(p => p.id === productId)?.name);
-  };
-
-  const toggleFavorite = (productId: number) => {
-    setProducts(products.map(product => 
-      product.id === productId 
-        ? { ...product, isFavorite: !product.isFavorite }
-        : product
-    ));
   };
 
   const handleAddToCart = (productId: number) => {
@@ -155,6 +165,10 @@ const Maquillage = () => {
     );
   };
 
+  const handleShopNow = () => {
+    navigate('/marques');
+  };
+
   return (
     <div className="min-h-screen bg-amber-50">
       <div className="pt-20 pb-12">
@@ -171,8 +185,11 @@ const Maquillage = () => {
                 <div className="absolute inset-0 bg-gradient-to-b from-amber-900/50 to-amber-800/70 flex flex-col items-center justify-center p-6 text-white">
                   <div className="text-6xl font-bold mb-4 transform group-hover:scale-110 transition-transform duration-300">50% Off</div>
                   <div className="text-2xl font-semibold mb-8">16 JAN - 20 JAN</div>
-                  <button className="bg-amber-600 text-white px-10 py-4 font-bold hover:bg-amber-700 transition-all duration-300 rounded-lg transform hover:scale-105 shadow-lg">
-                    SHOP NOW
+                  <button 
+                    onClick={handleShopNow}
+                    className="bg-amber-600 text-white px-10 py-4 font-bold hover:bg-amber-700 transition-all duration-300 rounded-lg transform hover:scale-105 shadow-lg"
+                  >
+                    ACHETER MAINTENANT
                   </button>
                 </div>
               </div>
@@ -194,7 +211,7 @@ const Maquillage = () => {
                       
                       <div className="absolute top-2 left-2">
                         <span className="bg-amber-600 text-white px-2 py-1 rounded text-xs font-bold shadow-lg">
-                          50% OFF
+                          -50%
                         </span>
                       </div>
                       
@@ -207,16 +224,11 @@ const Maquillage = () => {
                             <ZoomIn className="w-4 h-4 text-amber-700" />
                           </button>
                           
-                          <button 
-                            onClick={() => toggleFavorite(product.id)}
-                            className={`p-2 rounded-full shadow-lg transition-all duration-200 transform hover:scale-110 ${
-                              product.isFavorite 
-                                ? 'bg-amber-600 text-white' 
-                                : 'bg-white text-amber-700 hover:bg-amber-50'
-                            }`}
-                          >
-                            <Heart className="w-4 h-4" fill={product.isFavorite ? "currentColor" : "none"} />
-                          </button>
+                          <HeartButton 
+                            product={product}
+                            size="sm"
+                            className="bg-white p-2 rounded-full shadow-lg hover:bg-amber-50"
+                          />
                         </div>
                       </div>
 
@@ -245,8 +257,8 @@ const Maquillage = () => {
                       <p className="text-xs text-amber-700 mb-2 line-clamp-1">{product.brand}</p>
                       
                       <div className="flex items-center gap-2">
-                        <span className="text-base font-bold text-amber-800">${product.salePrice.toFixed(2)}</span>
-                        <span className="text-sm text-amber-600 line-through">${product.originalPrice.toFixed(2)}</span>
+                        <span className="text-base font-bold text-amber-800">{product.salePrice.toFixed(2)} €</span>
+                        <span className="text-sm text-amber-600 line-through">{product.originalPrice.toFixed(2)} €</span>
                       </div>
                     </div>
                   </div>
@@ -281,7 +293,7 @@ const Maquillage = () => {
                 />
                 <div className="absolute top-2 left-2">
                   <span className="bg-amber-600 text-white px-2 py-1 rounded text-xs font-bold">
-                    50% OFF
+                    -50%
                   </span>
                 </div>
               </div>
@@ -320,21 +332,16 @@ const Maquillage = () => {
                 
                 <div className="flex items-center justify-between pt-3 border-t border-amber-200">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-amber-800">${selectedProduct.salePrice.toFixed(2)}</span>
-                    <span className="text-sm text-amber-600 line-through">${selectedProduct.originalPrice.toFixed(2)}</span>
+                    <span className="text-lg font-bold text-amber-800">{selectedProduct.salePrice.toFixed(2)} €</span>
+                    <span className="text-sm text-amber-600 line-through">{selectedProduct.originalPrice.toFixed(2)} €</span>
                   </div>
                   
                   <div className="flex gap-2">
-                    <button 
-                      onClick={() => toggleFavorite(selectedProduct.id)}
-                      className={`p-2 rounded border transition-all duration-200 transform hover:scale-110 ${
-                        selectedProduct.isFavorite 
-                          ? 'bg-amber-600 text-white border-amber-600' 
-                          : 'bg-white text-amber-700 border-amber-300 hover:border-amber-600'
-                      }`}
-                    >
-                      <Heart className="w-4 h-4" fill={selectedProduct.isFavorite ? "currentColor" : "none"} />
-                    </button>
+                    <HeartButton 
+                      product={selectedProduct}
+                      size="sm"
+                      className="bg-white p-2 rounded border border-amber-300 hover:border-amber-600"
+                    />
                     
                     <button 
                       onClick={() => {

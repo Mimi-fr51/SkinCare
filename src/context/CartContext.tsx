@@ -1,17 +1,16 @@
-// src/context/CartContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 export interface CartItem {
   id: string;
   name: string;
-  price: string;
+  price: number;
   image: string;
   quantity: number;
 }
 
 interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (product: { name: string; price: string; image: string }) => void;
+  addToCart: (product: { id: string; name: string; price: any; image: string }) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -35,20 +34,52 @@ interface CartProviderProps {
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const addToCart = (product: { name: string; price: string; image: string }) => {
+  // Charger le panier depuis localStorage au démarrage
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        // S'assurer que tous les prix sont des nombres
+        const cartWithNumberPrices = parsedCart.map((item: any) => ({
+          ...item,
+          price: typeof item.price === 'string' ? parseFloat(item.price) : item.price
+        }));
+        setCartItems(cartWithNumberPrices);
+      } catch (error) {
+        console.error('Erreur lors du chargement du panier:', error);
+        localStorage.removeItem('cart');
+      }
+    }
+  }, []);
+
+  // Sauvegarder le panier dans localStorage à chaque changement
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  // Debug : affiche le panier quand il change
+  useEffect(() => {
+    console.log('Panier mis à jour:', cartItems);
+  }, [cartItems]);
+
+  const addToCart = (product: { id: string; name: string; price: any; image: string }) => {
+    // Convertir le prix en nombre si c'est une chaîne
+    const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+    
     setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.name === product.name);
+      const existingItem = prevItems.find(item => item.id === product.id);
       
       if (existingItem) {
         return prevItems.map(item =>
-          item.name === product.name 
+          item.id === product.id 
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       } else {
         return [...prevItems, { 
           ...product, 
-          id: Date.now().toString(),
+          price, // Utiliser le prix converti
           quantity: 1 
         }];
       }
