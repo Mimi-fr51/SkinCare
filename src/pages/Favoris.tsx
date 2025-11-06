@@ -17,6 +17,7 @@ const Favoris = () => {
 
   const handleAddToCart = (product: Product) => {
     addToCart({
+      id: product.id.toString(), // CORRECTION : Ajout de l'id
       name: product.name,
       price: product.salePrice.toFixed(2),
       image: product.image

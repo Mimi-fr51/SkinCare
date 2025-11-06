@@ -1,4 +1,3 @@
-// src/pages/Maquillage.tsx
 import { useState } from 'react';
 import { ZoomIn, Plus, X, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -123,6 +122,7 @@ const Maquillage = () => {
     if (!product) return;
 
     addToCart({
+      id: product.id.toString(), // CORRECTION : Ajout de l'id
       name: product.name,
       price: product.salePrice.toFixed(2),
       image: product.image
